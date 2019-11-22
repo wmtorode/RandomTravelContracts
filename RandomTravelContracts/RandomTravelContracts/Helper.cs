@@ -26,7 +26,7 @@ namespace RandomTravelContracts {
                 bool result = false;
                 if (Sim.Starmap != null ) {
                     foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system)) {
-                        if (system.Owner != neigbourSystem.Owner) {
+                        if (system.OwnerDef.ID != neigbourSystem.OwnerDef.ID) {
                             result = true;
                             break;
                         }
@@ -42,12 +42,11 @@ namespace RandomTravelContracts {
 
         public static bool IsWarBorder(StarSystem system, SimGameState Sim) {
             try {
-                FactionDef factiondef = Sim.FactionsDict[system.Owner];
                 bool result = false;
                 if (Sim.Starmap != null) {
-                    if (system.Owner != Faction.NoFaction) {
+                    if (system.OwnerValue.Name != FactionEnumeration.GetNoFactionValue().Name) {
                         foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system)) {
-                            if (factiondef.Enemies.Contains(neigbourSystem.Owner) && neigbourSystem.Owner != Faction.NoFaction) {
+                            if (system.OwnerDef.Enemies.Contains(neigbourSystem.OwnerValue.Name) && neigbourSystem.OwnerValue.Name != FactionEnumeration.GetNoFactionValue().Name) {
                                 result = true;
                                 break;
                             }

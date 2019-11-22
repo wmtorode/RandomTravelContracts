@@ -20,7 +20,7 @@ namespace RandomTravelContracts {
                 if (__instance.UXAttached) {
                     __instance.RoomManager.ShipRoom.RefreshData();
                 }
-                __instance.SetReputation(Faction.Owner, __instance.CurSystem.OwnerReputation, StatCollection.StatOperation.Set, null);
+                __instance.SetReputation(FactionEnumeration.GetOwnerFactionValue(), __instance.CurSystem.OwnerReputation, StatCollection.StatOperation.Set, null);
                 Fields.currBorderCons = 0;
                 return false;
             }
@@ -122,11 +122,12 @@ namespace RandomTravelContracts {
             }
             List<StarSystem> AllSystems = new List<StarSystem>();
             foreach (StarSystem addsystem in __instance.StarSystems) {
-                if (addsystem.Owner != Faction.NoFaction) {
+                if (addsystem.OwnerValue.Name != FactionEnumeration.GetNoFactionValue().Name) {
                     AllSystems.Add(addsystem);
                 }
             }
             while (contractList.Count < maxContracts && debugCount < 1000) {
+                try { 
                 if (usingBreadcrumbs) {
                     List<StarSystem> listsys = AllSystems;
                     listsys.Shuffle();
@@ -148,6 +149,12 @@ namespace RandomTravelContracts {
                     else {
                         system = listsys[0];
                     }
+                }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e);
+                    yield break;
                 }
                 var difficultyRange = AccessTools.Method(typeof(SimGameState), "GetContractRangeDifficultyRange").Invoke(__instance, new object[] { system, __instance.SimGameMode, __instance.GlobalDifficulty });
                 Dictionary<int, List<ContractOverride>> potentialContracts = (Dictionary<int, List<ContractOverride>>)AccessTools.Method(typeof(SimGameState), "GetSinglePlayerProceduralContractOverrides").Invoke(__instance, new object[] { difficultyRange });
@@ -175,7 +182,7 @@ namespace RandomTravelContracts {
                     level = activeMaps.GetNext(false);
                     MapEncounterContractData = AccessTools.Method(typeof(SimGameState), "FillMapEncounterContractData").Invoke(__instance, new object[] { system, difficultyRange, potentialContracts, validParticipants, level });
                 }
-                system.SetCurrentContractFactions(Faction.INVALID_UNSET, Faction.INVALID_UNSET);
+                system.SetCurrentContractFactions(FactionEnumeration.GetInvalidUnsetFactionValue(), FactionEnumeration.GetInvalidUnsetFactionValue());
                 HashSet<int> Contracts = Traverse.Create(MapEncounterContractData).Field("Contracts").GetValue<HashSet<int>>();
 
                 if (MapEncounterContractData == null || Contracts.Count == 0) {
